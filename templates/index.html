@@ -1,0 +1,83 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link rel="shortcut icon" type="image/ico" href="favicon.ico"/>
+    <title>SlickGrid example: Optimizing DataView</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='slickgrid/css/slick.grid.css') }}" type="text/css"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='slickgrid/css/slick.pager.css') }}" type="text/css"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='slickgrid/css/examples.css') }}" type="text/css"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='slickgrid/css/examples-unicode-icons.css') }}"
+          type="text/css"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <style>
+        * {
+            font-size: 18px;
+        }
+
+        .table > :not(caption) > * > * {
+            padding: 0;
+        }
+
+        .slick-header-column.ui-state-default, .slick-group-header-column.ui-state-default {
+            background-color: hotpink;
+            width: 120px;
+        }
+    </style>
+</head>
+<body class="container my-5">
+<h4>SlickGrid Example</h4>
+<div style="">
+    <table id="myGrid" class="table table-bordered table-hover table-striped"
+           style="font-size:18px;width:100%;height:500px;"></table>
+
+    <div id="pager" style="width:100%;height:20px; font-size: 38px!important;"></div>
+</div>
+
+<script src="{{ url_for('static', filename='slickgrid/js/jquery-3.1.0.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs/Sortable.min.js"></script>
+
+<script src="{{ url_for('static', filename='slickgrid/js/slick.core.js') }}"></script>
+<script src="{{ url_for('static', filename='slickgrid/js/slick.interactions.js') }}"></script>
+<script src="{{ url_for('static', filename='slickgrid/js/slick.formatters.js') }}"></script>
+<script src="{{ url_for('static', filename='slickgrid/js/slick.grid.js') }}"></script>
+<script src="{{ url_for('static', filename='slickgrid/js/slick.dataview.js') }}"></script>
+<script src="{{ url_for('static', filename='slickgrid/js/slick.pager.js') }}"></script>
+<script src="{{ url_for('static', filename='slickgrid/js/slick.editors.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+        crossorigin="anonymous"></script>
+<script>
+    var grid;
+
+    var options = {
+        editable: true,
+        enableAddRow: true,
+        enableCellNavigation: true
+    };
+    var editorLock = new Slick.EditorLock();
+    $(function () {
+        grid = new Slick.Grid("#myGrid", {{list | tojson | safe}},{{fields | tojson | safe}},options);
+        grid.setEditorLock(editorLock);
+
+        grid.onCellChange.subscribe(function (e, args) {
+            data[args.row][args.cell] = args.item[args.cell];
+        });
+
+        grid.onBeforeEditCell.subscribe(function (e, args) {
+            var item = args.item;
+            var column = args.column;
+            editorLock.cancelCurrentEdit();
+            if (column.editor) {
+                var editable = grid.getEditorLock().isEditable();
+                if (editable) {
+                    column.editor.applyValue(item, item[column.field]);
+                    grid.getEditorLock().commitCurrentEdit();
+                }
+            }
+        });
+    })
+</script>
+</body>
+</html>
